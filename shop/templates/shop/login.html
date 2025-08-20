@@ -1,3 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Home - TechStore{% endblock %}
+
+{% block content %}
 <form method="post">
     {% csrf_token %}
     <label for="username">Username:</label>
@@ -18,3 +22,4 @@
     {% endfor %}
     </ul>
 {% endif %}
+{% endblock %}
