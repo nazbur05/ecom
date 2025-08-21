@@ -1,7 +1,5 @@
 from django.shortcuts import render
-from django.views import View
+from shop.models import Order, Customer, Product
 
-class Cart(View):
-	def get(self, request):
-		# Example: render a cart page
-		return render(request, 'cart.html')
+def cart_view(request):
+    return render(request, 'shop/cart.html')

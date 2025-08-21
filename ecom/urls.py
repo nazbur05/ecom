@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
+from shop.views.home import home_view
 from . import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('shop.urls')), 
+    path('', home_view, name='home'),
+    path('shop/', include('shop.urls')), 
 ]
 
 if settings.DEBUG:

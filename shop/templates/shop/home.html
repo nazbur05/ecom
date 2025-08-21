@@ -1,7 +1,19 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<p>You are logged in as {{ request.user.username }}</p>
+{% comment %} {% block content %}
+<p>You are logged in as {{ request.user.username }}</p> {% endcomment %}
 
-<a href="{% url 'logout' %}">Logout</a>
+{% block content %}
+<div class="container">
+    <h1>Latest Products</h1>
+    <div class="products">
+        {% for product in products %}
+            <div class="product">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                <h3>{{ product.name }}</h3>
+                <p>Price: {{ product.price }} KZT</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

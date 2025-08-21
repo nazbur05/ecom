@@ -82,7 +82,10 @@ class Customer(models.Model):
         if self.user:
             return self.user.email
         return ""
-    
+
+    def get_favourites(self):
+        return self.favourites.all()
+
 @receiver(post_save, sender=User)
 def create_customer(sender, instance, created, **kwargs):
     if created:
