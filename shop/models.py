@@ -57,7 +57,7 @@ class Product(models.Model):
     @staticmethod
     def get_all_products_by_categoryid(category_id):
         if category_id:
-            return Product.objects.filter(subcategory__category=category_id)
+            return Product.objects.filter(subcategory__parent=category_id)
         else:
             return Product.get_all_products()
         

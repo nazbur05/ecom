@@ -23,4 +23,7 @@ urlpatterns = [
     
     path('api/', include(router.urls)),
     path('product/<int:pk>/', product.product_api_detail, name='product'),
+    path('products/category/<int:category_id>/', product.products_by_category, name='products_by_category'),
+    path('products/subcategory/<int:subcategory_id>/', product.products_by_subcategory, name='products_by_subcategory'),
+
 ]

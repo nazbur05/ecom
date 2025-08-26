@@ -7,6 +7,11 @@
 </div>
 <script>
 let productData = null;
+let isFavourited = false;
+
+function updateFavButton() {
+    document.getElementById('fav-btn').textContent = isFavourited ? 'Added to Favourites' : 'Add to Favourites';
+}
 
 fetch('/shop/api/products/{{ product_id }}/')
     .then(response => response.json())
@@ -18,10 +23,20 @@ fetch('/shop/api/products/{{ product_id }}/')
             <p>Price: ${product.price} KZT</p>
             <p>${product.description}</p>
         `;
+        // Check if product is in favourites
+        fetch('/shop/api/customers/{{ request.user.customer.id }}/favourites/')
+            .then(response => response.json())
+            .then(favourites => {
+                isFavourited = favourites.some(fav => fav.id === product.id);
+                updateFavButton();
+            });
     });
 
 document.getElementById('fav-btn').onclick = function() {
-    fetch('/shop/api/customers/{{ request.user.customer.id }}/add_favourite/', {
+    const url = isFavourited
+        ? '/shop/api/customers/{{ request.user.customer.id }}/remove_favourite/'
+        : '/shop/api/customers/{{ request.user.customer.id }}/add_favourite/';
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -32,7 +47,11 @@ document.getElementById('fav-btn').onclick = function() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'added') {
-            document.getElementById('fav-btn').textContent = 'Added!';
+            isFavourited = true;
+            updateFavButton();
+        } else if (data.status === 'removed') {
+            isFavourited = false;
+            updateFavButton();
         } else {
             document.getElementById('fav-btn').textContent = 'Error';
         }
