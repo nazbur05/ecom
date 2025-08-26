@@ -40,17 +40,14 @@ class Product(models.Model):
         max_length=250, default='', blank=True, null=True)
     image = models.ImageField(upload_to='uploads/products/')
 
-    def __str__(self):
-        return self.name
+    @staticmethod
+    def get_all_products():
+        return Product.objects.all()
 
     @staticmethod
     def get_products_by_id(ids):
         return Product.objects.filter(id__in=ids)
-
-    @staticmethod
-    def get_all_products():
-        return Product.objects.all()
-    
+  
     @staticmethod
     def get_all_products_by_subcategoryid(subcategory_id):
         if subcategory_id:
@@ -64,10 +61,12 @@ class Product(models.Model):
         else:
             return Product.get_all_products()
         
+    def __str__(self):
+        return self.name
+        
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     phone = models.CharField(max_length=10)
-
     favourites = models.ManyToManyField(Product, related_name='favourited_by', blank=True)
 
     def __str__(self):
