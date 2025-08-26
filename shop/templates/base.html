@@ -5,18 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}TechStore{% endblock %}</title>
-    {% comment %} <link rel="icon" type="image/x-icon" href="{% static 'shop/favicon.ico' %}"> {% endcomment %}
-    <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
-    <style>
-        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        header { background: #ffa970ff; color: #fff; padding: 10px 0; text-align: center; }
-        nav ul { display: flex; align-items: center; list-style: none; padding: 0; }
-        nav ul li { margin: 0 15px; position: relative; }
-        nav a { color: #fff; text-decoration: none; }
-        nav .dropdown ul { display: none; position: absolute; top: 100%; left: 0; background: #444; padding: 10px 0; min-width: 150px; }
-        nav .dropdown:hover ul { display: block; }
-        nav .dropdown ul li { padding: 8px 12px; }
-    </style>
+    <link rel="stylesheet" href="{% static 'shop/css/styles.css' %}">
 </head>
 
 <body>
@@ -28,12 +17,15 @@
                     <a href="#">Categories</a>
                     <ul>
                         {% for category in categories %}
-                            <li>{{ category.name }}
+                            <li>
+                                {{ category.name }}
+                                {% if category.subcategories.all %}
                                 <ul>
                                     {% for subcategory in category.subcategories.all %}
                                         <li>{{ subcategory.name }}</li>
                                     {% endfor %}
                                 </ul>
+                                {% endif %}
                             </li>
                         {% endfor %}
                     </ul>

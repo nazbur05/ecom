@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import home, signup, login, cart, checkout, orders, favourites, profile
+from .views import home, signup, login, cart, checkout, orders, favourites, profile, product
 from .api_views import CategoryViewSet, SubCategoryViewSet, ProductViewSet, CustomerViewSet, OrderViewSet
 
 router = DefaultRouter()
@@ -22,4 +22,5 @@ urlpatterns = [
     path('profile/', profile.profile_view, name='profile'),
     
     path('api/', include(router.urls)),
+    path('product/<int:pk>/', product.product_api_detail, name='product'),
 ]
