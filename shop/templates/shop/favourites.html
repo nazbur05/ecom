@@ -1,1 +1,20 @@
-<h1>Favourites</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Your Favourites</h1>
+    <div id="favourites-list"></div>
+</div>
+<script>
+fetch('/shop/api/customers/{{ request.user.customer.id }}/favourites/')
+    .then(response => response.json())
+    .then(products => {
+        document.getElementById('favourites-list').innerHTML = products.map(product => `
+            <div>
+                <img src="${product.image}" style="max-width:80px;">
+                <h3>${product.name}</h3>
+                <p>Price: ${product.price} KZT</p>
+            </div>
+        `).join('');
+    });
+</script>
+{% endblock %}

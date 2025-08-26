@@ -3,11 +3,15 @@
 {% block content %}
 <div class="container">
     <div id="product-detail"></div>
+    <button id="fav-btn">Add to Favourites</button>
 </div>
 <script>
+let productData = null;
+
 fetch('/shop/api/products/{{ product_id }}/')
     .then(response => response.json())
     .then(product => {
+        productData = product;
         document.getElementById('product-detail').innerHTML = `
             <img src="${product.image}" style="max-width:220px;max-height:220px;">
             <h2>${product.name}</h2>
@@ -15,5 +19,27 @@ fetch('/shop/api/products/{{ product_id }}/')
             <p>${product.description}</p>
         `;
     });
+
+document.getElementById('fav-btn').onclick = function() {
+    fetch('/shop/api/customers/{{ request.user.customer.id }}/add_favourite/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({product_id: {{ product_id }}})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'added') {
+            document.getElementById('fav-btn').textContent = 'Added!';
+        } else {
+            document.getElementById('fav-btn').textContent = 'Error';
+        }
+    })
+    .catch(() => {
+        document.getElementById('fav-btn').textContent = 'Error';
+    });
+};
 </script>
 {% endblock %}
