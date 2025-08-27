@@ -3,6 +3,15 @@
 <div class="container">
     <h1>Your Favourites</h1>
     <div class="products" id="favourites-list"></div>
+    <div class="pagination" style="text-align:center; margin:2rem 0;">
+        {% if favourites.has_previous %}
+            <a href="?page={{ favourites.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ favourites.number }} of {{ favourites.paginator.num_pages }}</span>
+        {% if favourites.has_next %}
+            <a href="?page={{ favourites.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
 </div>
 <script>
 const isAuthenticated = {{ is_authenticated|yesno:"true,false" }};
@@ -103,7 +112,7 @@ fetch('/shop/api/customers/{{ request.user.customer.id }}/favourites/')
                     body: JSON.stringify({product_id: productId})
                 })
                 .then(response => response.json())
-                .then(data => {
+                .then data => {
                     if (data.status === 'added') {
                         isInCart = true;
                         updateCartButton();
