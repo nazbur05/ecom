@@ -1,1 +1,24 @@
-<h1>Shopping Cart</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Your Cart</h1>
+    <div id="cart-list"></div>
+</div>
+<script>
+fetch('/shop/api/cart/') //will add soon
+    .then(response => response.json())
+    .then(products => {
+        if (products.length === 0) {
+            document.getElementById('cart-list').innerHTML = '<p>Your cart is empty.</p>';
+        } else {
+            document.getElementById('cart-list').innerHTML = products.map(product => `
+                <div>
+                    <img src="${product.image}" style="max-width:80px;">
+                    <h3>${product.name}</h3>
+                    <p>Price: ${product.price} KZT</p>
+                </div>
+            `).join('');
+        }
+    });
+</script>
+{% endblock %}

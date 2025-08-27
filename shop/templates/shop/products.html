@@ -15,10 +15,103 @@
                 <img src="{{ product.image.url }}" alt="{{ product.name }}">
                 <h3>{{ product.name }}</h3>
                 <p>Price: {{ product.price }} KZT</p>
+                <div class="product-actions">
+                    <button class="fav-btn" data-product="{{ product.id }}">
+                        {% if product.id in favourites %}
+                            &#10084;&#65039; <!-- filled heart -->
+                        {% else %}
+                            &#9825; <!-- empty heart -->
+                        {% endif %}
+                    </button>
+                    <button class="cart-btn" data-product="{{ product.id }}">
+                        {% if product.id in cart_products %}
+                            <span style="opacity:0.7;">&#128722;</span> <!-- faded cart -->
+                        {% else %}
+                            &#128722; <!-- normal cart -->
+                        {% endif %}
+                    </button>
+                </div>
             </a>
         {% empty %}
             <p>No products found.</p>
         {% endfor %}
     </div>
 </div>
+<script>
+document.querySelectorAll('.product').forEach(card => {
+    const favBtn = card.querySelector('.fav-btn');
+    const cartBtn = card.querySelector('.cart-btn');
+    const productId = favBtn.getAttribute('data-product');
+    let isFavourited = favBtn.innerHTML.includes('&#10084;');
+    let isInCart = cartBtn.innerHTML.includes('opacity');
+
+    function updateFavButton() {
+        favBtn.innerHTML = isFavourited ? '&#10084;&#65039;' : '&#9825;';
+    }
+
+    function updateCartButton() {
+        cartBtn.innerHTML = isInCart ? '<span style="opacity:0.7;">&#128722;</span>' : '&#128722;';
+    }
+
+    favBtn.onclick = function(e) {
+        e.preventDefault();
+        const url = isFavourited
+            ? `/shop/api/customers/{{ request.user.customer.id }}/remove_favourite/`
+            : `/shop/api/customers/{{ request.user.customer.id }}/add_favourite/`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({product_id: productId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'added') {
+                isFavourited = true;
+                updateFavButton();
+            } else if (data.status === 'removed') {
+                isFavourited = false;
+                updateFavButton();
+            } else {
+                favBtn.innerHTML = 'Error';
+            }
+        })
+        .catch(() => {
+            favBtn.innerHTML = 'Error';
+        });
+    };
+
+    cartBtn.onclick = function(e) {
+        e.preventDefault();
+        const url = isInCart
+            ? `/shop/api/cart/remove/` //will add soon
+            : `/shop/api/cart/add/`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({product_id: productId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'added') {
+                isInCart = true;
+                updateCartButton();
+            } else if (data.status === 'removed') {
+                isInCart = false;
+                updateCartButton();
+            } else {
+                cartBtn.innerHTML = 'Error';
+            }
+        })
+        .catch(() => {
+            cartBtn.innerHTML = 'Error';
+        });
+    };
+});
+</script>
 {% endblock %}
