@@ -4,13 +4,20 @@
 <div class="container">
     <div id="product-detail"></div>
     <button id="fav-btn">Add to Favourites</button>
+    <button id="cart-btn">Add to Cart</button>
 </div>
 <script>
 let productData = null;
 let isFavourited = false;
+let isInCart = false;
+const isAuthenticated = {{ is_authenticated|yesno:"true,false" }};
 
 function updateFavButton() {
     document.getElementById('fav-btn').textContent = isFavourited ? 'Added to Favourites' : 'Add to Favourites';
+}
+
+function updateCartButton() {
+    document.getElementById('cart-btn').textContent = isInCart ? 'Added to Cart' : 'Add to Cart';
 }
 
 fetch('/shop/api/products/{{ product_id }}/')
@@ -30,9 +37,21 @@ fetch('/shop/api/products/{{ product_id }}/')
                 isFavourited = favourites.some(fav => fav.id === product.id);
                 updateFavButton();
             });
+        // Check if product is in cart
+        fetch('/shop/api/customers/{{ request.user.customer.id }}/cart/')
+            .then(response => response.json())
+            .then(cartProducts => {
+                isInCart = cartProducts.some(cart => cart.id === product.id);
+                updateCartButton();
+            });
     });
 
-document.getElementById('fav-btn').onclick = function() {
+document.getElementById('fav-btn').onclick = function(e) {
+    e.preventDefault();
+    if (!isAuthenticated) {
+        window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+        return;
+    }
     const url = isFavourited
         ? '/shop/api/customers/{{ request.user.customer.id }}/remove_favourite/'
         : '/shop/api/customers/{{ request.user.customer.id }}/add_favourite/';
@@ -58,6 +77,40 @@ document.getElementById('fav-btn').onclick = function() {
     })
     .catch(() => {
         document.getElementById('fav-btn').textContent = 'Error';
+    });
+};
+
+document.getElementById('cart-btn').onclick = function(e) {
+    e.preventDefault();
+    if (!isAuthenticated) {
+        window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+        return;
+    }
+    const url = isInCart
+        ? '/shop/api/customers/{{ request.user.customer.id }}/remove_from_cart/'
+        : '/shop/api/customers/{{ request.user.customer.id }}/add_to_cart/';
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({product_id: {{ product_id }}})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'added') {
+            isInCart = true;
+            updateCartButton();
+        } else if (data.status === 'removed') {
+            isInCart = false;
+            updateCartButton();
+        } else {
+            document.getElementById('cart-btn').textContent = 'Error';
+        }
+    })
+    .catch(() => {
+        document.getElementById('cart-btn').textContent = 'Error';
     });
 };
 </script>

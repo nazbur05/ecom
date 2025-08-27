@@ -42,6 +42,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def checkout(self, request, pk=None):
         customer = self.get_object()
+        required_fields = [customer.phone, customer.user.first_name, customer.user.last_name, customer.user.email]
+        if not all(required_fields):
+            return Response({'status': 'error', 'message': 'Please complete your profile before placing an order.'}, status=status.HTTP_400_BAD_REQUEST)
         address = request.data.get('address', '')
         phone = request.data.get('phone', '')
         orders = Order.objects.filter(customer=customer, status=False)

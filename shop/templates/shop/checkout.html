@@ -9,7 +9,7 @@
         </label>
         <br>
         <label>Phone Number:<br>
-            <input type="text" name="phone" required>
+            <input type="text" name="phone" required value="{{ customer.phone }}">
         </label>
         <br>
         <button type="submit">Place Order</button>
@@ -47,7 +47,7 @@ document.getElementById('checkout-form').onsubmit = function(e) {
         if (data.status === 'success') {
             window.location.href = "{% url 'orders' %}";
         } else {
-            document.getElementById('checkout-message').textContent = 'Error placing order.';
+            document.getElementById('checkout-message').textContent = data.message || 'Error placing order.';
         }
     });
 };

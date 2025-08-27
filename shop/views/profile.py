@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from shop.models import Customer
 
-@login_required
+@login_required(login_url='login')
 def profile_view(request):
     customer = Customer.objects.get(user=request.user)
     if request.method == 'POST':
@@ -11,12 +11,12 @@ def profile_view(request):
         email = request.POST.get('email', '')
         if full_name:
             names = full_name.split(' ', 1)
-            request.user.first_name = names[0]
-            request.user.last_name = names[1] if len(names) > 1 else ''
-            request.user.save()
+            customer.user.first_name = names[0]
+            customer.user.last_name = names[1] if len(names) > 1 else ''
+            customer.user.save()
         if email:
-            request.user.email = email
-            request.user.save()
+            customer.user.email = email
+            customer.user.save()
         customer.phone = phone
         customer.save()
         return redirect('profile')

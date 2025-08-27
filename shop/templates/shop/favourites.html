@@ -2,19 +2,123 @@
 {% block content %}
 <div class="container">
     <h1>Your Favourites</h1>
-    <div id="favourites-list"></div>
+    <div class="products" id="favourites-list"></div>
 </div>
 <script>
+const isAuthenticated = {{ is_authenticated|yesno:"true,false" }};
+const favourites = new Set([
+    {% for product in favourites %}
+        {{ product.id }},
+    {% endfor %}
+]);
+const cartProducts = new Set([
+    {% for product_id in cart_products %}
+        {{ product_id }},
+    {% endfor %}
+]);
+
 fetch('/shop/api/customers/{{ request.user.customer.id }}/favourites/')
     .then(response => response.json())
     .then(products => {
         document.getElementById('favourites-list').innerHTML = products.map(product => `
-            <div>
-                <img src="${product.image}" style="max-width:80px;">
+            <a href="/shop/product/${product.id}/" class="product">
+                <img src="${product.image}" alt="${product.name}">
                 <h3>${product.name}</h3>
                 <p>Price: ${product.price} KZT</p>
-            </div>
+                <div class="product-actions">
+                    <button class="fav-btn" data-product="${product.id}">
+                        ${favourites.has(product.id) ? '&#10084;&#65039;' : '&#9825;'}
+                    </button>
+                    <button class="cart-btn" data-product="${product.id}">
+                        ${cartProducts.has(product.id) ? '<span style="opacity:0.7;">&#128722;</span>' : '&#128722;'}
+                    </button>
+                </div>
+            </a>
         `).join('');
+        
+        document.querySelectorAll('.product').forEach(card => {
+            const favBtn = card.querySelector('.fav-btn');
+            const cartBtn = card.querySelector('.cart-btn');
+            const productId = favBtn.getAttribute('data-product');
+            let isFavourited = favBtn.innerHTML.includes('&#10084;');
+            let isInCart = cartBtn.innerHTML.includes('opacity');
+
+            function updateFavButton() {
+                favBtn.innerHTML = isFavourited ? '&#10084;&#65039;' : '&#9825;';
+            }
+
+            function updateCartButton() {
+                cartBtn.innerHTML = isInCart ? '<span style="opacity:0.7;">&#128722;</span>' : '&#128722;';
+            }
+
+            favBtn.onclick = function(e) {
+                e.preventDefault();
+                if (!isAuthenticated) {
+                    window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+                    return;
+                }
+                const url = isFavourited
+                    ? `/shop/api/customers/{{ request.user.customer.id }}/remove_favourite/`
+                    : `/shop/api/customers/{{ request.user.customer.id }}/add_favourite/`;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({product_id: productId})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'added') {
+                        isFavourited = true;
+                        updateFavButton();
+                    } else if (data.status === 'removed') {
+                        isFavourited = false;
+                        updateFavButton();
+                    } else {
+                        favBtn.innerHTML = 'Error';
+                    }
+                })
+                .catch(() => {
+                    favBtn.innerHTML = 'Error';
+                });
+            };
+
+            cartBtn.onclick = function(e) {
+                e.preventDefault();
+                if (!isAuthenticated) {
+                    window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+                    return;
+                }
+                const url = isInCart
+                    ? `/shop/api/customers/{{ request.user.customer.id }}/remove_from_cart/`
+                    : `/shop/api/customers/{{ request.user.customer.id }}/add_to_cart/`;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({product_id: productId})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'added') {
+                        isInCart = true;
+                        updateCartButton();
+                    } else if (data.status === 'removed') {
+                        isInCart = false;
+                        updateCartButton();
+                    } else {
+                        cartBtn.innerHTML = 'Error';
+                    }
+                })
+                .catch(() => {
+                    cartBtn.innerHTML = 'Error';
+                });
+            };
+        });
     });
 </script>
 {% endblock %}
