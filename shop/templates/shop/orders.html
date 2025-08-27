@@ -1,1 +1,28 @@
-<h1>Orders</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Your Orders</h1>
+    <div id="orders-list"></div>
+</div>
+<script>
+fetch('/shop/api/customers/{{ request.user.customer.id }}/orders/')
+    .then(response => response.json())
+    .then(orders => {
+        if (orders.length === 0) {
+            document.getElementById('orders-list').innerHTML = '<p>No orders found.</p>';
+        } else {
+            document.getElementById('orders-list').innerHTML = orders.map(order => `
+                <div>
+                    <h3>${order.product.name}</h3>
+                    <img src="${order.product.image}" style="max-width:80px;">
+                    <p>Quantity: ${order.quantity}</p>
+                    <p>Price: ${order.price} KZT</p>
+                    <p>Address: ${order.address}</p>
+                    <p>Phone: ${order.phone}</p>
+                    <p>Date: ${order.date}</p>
+                </div>
+            `).join('');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,1 +1,55 @@
-<h1>Checkout</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Checkout</h1>
+    <div id="checkout-summary"></div>
+    <form id="checkout-form">
+        <label>Shipping Address:<br>
+            <input type="text" name="address" required>
+        </label>
+        <br>
+        <label>Phone Number:<br>
+            <input type="text" name="phone" required>
+        </label>
+        <br>
+        <button type="submit">Place Order</button>
+    </form>
+    <div id="checkout-message"></div>
+</div>
+<script>
+fetch('/shop/api/customers/{{ request.user.customer.id }}/cart/')
+    .then(response => response.json())
+    .then(products => {
+        let total = products.reduce((sum, p) => sum + p.price * (p.quantity || 1), 0);
+        document.getElementById('checkout-summary').innerHTML = `
+            <h3>Order Summary</h3>
+            <ul>
+                ${products.map(p => `<li>${p.name} x ${p.quantity || 1} = ${p.price * (p.quantity || 1)} KZT</li>`).join('')}
+            </ul>
+            <strong>Total: ${total} KZT</strong>
+        `;
+    });
+
+document.getElementById('checkout-form').onsubmit = function(e) {
+    e.preventDefault();
+    const address = this.address.value;
+    const phone = this.phone.value;
+    fetch('/shop/api/customers/{{ request.user.customer.id }}/checkout/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({address: address, phone: phone})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = "{% url 'orders' %}";
+        } else {
+            document.getElementById('checkout-message').textContent = 'Error placing order.';
+        }
+    });
+};
+</script>
+{% endblock %}

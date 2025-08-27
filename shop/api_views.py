@@ -40,6 +40,38 @@ class CustomerViewSet(viewsets.ModelViewSet):
         return Response(products)
 
     @action(detail=True, methods=['post'])
+    def checkout(self, request, pk=None):
+        customer = self.get_object()
+        address = request.data.get('address', '')
+        phone = request.data.get('phone', '')
+        orders = Order.objects.filter(customer=customer, status=False)
+        if not orders.exists():
+            return Response({'status': 'error', 'message': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
+        for order in orders:
+            order.address = address
+            order.phone = phone
+            order.status = True
+            order.save()
+        return Response({'status': 'success'})
+    
+    @action(detail=True, methods=['get'])
+    def orders(self, request, pk=None):
+        customer = self.get_object()
+        orders = Order.objects.filter(customer=customer, status=True).order_by('-date')
+        data = []
+        for order in orders:
+            product_data = ProductSerializer(order.product).data
+            data.append({
+                'product': product_data,
+                'quantity': order.quantity,
+                'price': order.price,
+                'address': order.address,
+                'phone': order.phone,
+                'date': order.date.strftime('%Y-%m-%d %H:%M'),
+            })
+        return Response(data)
+
+    @action(detail=True, methods=['post'])
     def add_favourite(self, request, pk=None):
         customer = self.get_object()
         product_id = request.data.get('product_id')
@@ -91,7 +123,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
             order.save()
             return Response({'status': 'updated'}, status=status.HTTP_200_OK)
         return Response({'error': 'Product not in cart'}, status=status.HTTP_404_NOT_FOUND)
-    
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
