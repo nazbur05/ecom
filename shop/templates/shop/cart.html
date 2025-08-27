@@ -2,23 +2,88 @@
 {% block content %}
 <div class="container">
     <h1>Your Cart</h1>
-    <div id="cart-list"></div>
+    <form id="cart-form">
+        <div id="cart-list"></div>
+        <div id="cart-summary" style="margin-top:20px; font-weight:bold;"></div>
+        <button type="button" id="checkout-btn" style="margin-top:20px;">Checkout</button>
+    </form>
 </div>
 <script>
-fetch('/shop/api/cart/') //will add soon
-    .then(response => response.json())
-    .then(products => {
-        if (products.length === 0) {
-            document.getElementById('cart-list').innerHTML = '<p>Your cart is empty.</p>';
-        } else {
-            document.getElementById('cart-list').innerHTML = products.map(product => `
-                <div>
-                    <img src="${product.image}" style="max-width:80px;">
-                    <h3>${product.name}</h3>
-                    <p>Price: ${product.price} KZT</p>
-                </div>
-            `).join('');
-        }
-    });
+let cartProducts = [];
+
+function renderCart(products) {
+    cartProducts = products;
+    let total = 0;
+    document.getElementById('cart-list').innerHTML = products.map(product => {
+        total += product.price * (product.quantity || 1);
+        return `
+            <div class="cart-item" data-product="${product.id}">
+                <img src="${product.image}" style="max-width:80px;">
+                <h3>${product.name}</h3>
+                <p>Price: ${product.price} KZT</p>
+                <label>Quantity:
+                    <input type="number" min="1" value="${product.quantity || 1}" class="qty-input" data-product="${product.id}">
+                </label>
+                <button class="remove-btn" data-product="${product.id}">Remove</button>
+            </div>
+        `;
+    }).join('');
+    document.getElementById('cart-summary').textContent = "Total: " + total + " KZT";
+}
+
+function fetchCart() {
+    fetch('/shop/api/customers/{{ request.user.customer.id }}/cart/')
+        .then(response => response.json())
+        .then(products => {
+            if (products.length === 0) {
+                document.getElementById('cart-list').innerHTML = '<p>Your cart is empty.</p>';
+                document.getElementById('cart-summary').textContent = '';
+            } else {
+                renderCart(products);
+            }
+        });
+}
+
+fetchCart();
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-btn')) {
+        const productId = e.target.getAttribute('data-product');
+        fetch(`/shop/api/customers/{{ request.user.customer.id }}/remove_from_cart/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({product_id: productId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            fetchCart();
+        });
+    }
+});
+
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('qty-input')) {
+        const productId = e.target.getAttribute('data-product');
+        const newQty = parseInt(e.target.value);
+        fetch(`/shop/api/customers/{{ request.user.customer.id }}/update_cart_quantity/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({product_id: productId, quantity: newQty})
+        })
+        .then(response => response.json())
+        .then(data => {
+            fetchCart();
+        });
+    }
+});
+
+document.getElementById('checkout-btn').onclick = function() {
+    window.location.href = "{% url 'checkout' %}";
+};
 </script>
 {% endblock %}

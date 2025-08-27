@@ -86,8 +86,8 @@ document.querySelectorAll('.product').forEach(card => {
     cartBtn.onclick = function(e) {
         e.preventDefault();
         const url = isInCart
-            ? `/shop/api/cart/remove/` //will add soon
-            : `/shop/api/cart/add/`;
+            ? `/shop/api/customers/{{ request.user.customer.id }}/remove_from_cart/`
+            : `/shop/api/customers/{{ request.user.customer.id }}/add_to_cart/`;
         fetch(url, {
             method: 'POST',
             headers: {

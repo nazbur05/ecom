@@ -26,6 +26,18 @@ class CustomerViewSet(viewsets.ModelViewSet):
         products = customer.favourites.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def cart(self, request, pk=None):
+        customer = self.get_object()
+        orders = Order.objects.filter(customer=customer, status=False)
+        products = []
+        for order in orders:
+            product_data = ProductSerializer(order.product).data
+            product_data['quantity'] = order.quantity
+            product_data['order_id'] = order.id
+            products.append(product_data)
+        return Response(products)
 
     @action(detail=True, methods=['post'])
     def add_favourite(self, request, pk=None):
@@ -48,7 +60,38 @@ class CustomerViewSet(viewsets.ModelViewSet):
             return Response({'status': 'removed'}, status=status.HTTP_200_OK)
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=True, methods=['post'])
+    def add_to_cart(self, request, pk=None):
+        customer = self.get_object()
+        product_id = request.data.get('product_id')
+        product = Product.objects.filter(pk=product_id).first()
+        if product:
+            Order.objects.create(customer=customer, product=product, price=product.price, status=False)
+            return Response({'status': 'added'}, status=status.HTTP_200_OK)
+        return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=True, methods=['post'])
+    def remove_from_cart(self, request, pk=None):
+        customer = self.get_object()
+        product_id = request.data.get('product_id')
+        order = Order.objects.filter(customer=customer, product_id=product_id, status=False).first()
+        if order:
+            order.delete()
+            return Response({'status': 'removed'}, status=status.HTTP_200_OK)
+        return Response({'error': 'Product not in cart'}, status=status.HTTP_404_NOT_FOUND)
+    @action(detail=True, methods=['post'])
+    def update_cart_quantity(self, request, pk=None):
+        customer = self.get_object()
+        product_id = request.data.get('product_id')
+        quantity = int(request.data.get('quantity', 1))
+        order = Order.objects.filter(customer=customer, product_id=product_id, status=False).first()
+        if order:
+            order.quantity = quantity
+            order.save()
+            return Response({'status': 'updated'}, status=status.HTTP_200_OK)
+        return Response({'error': 'Product not in cart'}, status=status.HTTP_404_NOT_FOUND)
+    
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
