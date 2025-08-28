@@ -17,7 +17,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
 
 class CustomerViewSet(viewsets.ModelViewSet):
-    queryset = Customer.objects.all()
+    queryset = Customer.get_all_customers()
     serializer_class = CustomerSerializer
 
     @action(detail=True, methods=['get'])
@@ -135,6 +135,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
             order.delete()
             return Response({'status': 'removed'}, status=status.HTTP_200_OK)
         return Response({'error': 'Product not in cart'}, status=status.HTTP_404_NOT_FOUND)
+    
     @action(detail=True, methods=['post'])
     def update_cart_quantity(self, request, pk=None):
         customer = self.get_object()
@@ -148,5 +149,5 @@ class CustomerViewSet(viewsets.ModelViewSet):
         return Response({'error': 'Product not in cart'}, status=status.HTTP_404_NOT_FOUND)
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.get_all_orders()
     serializer_class = OrderSerializer

@@ -63,7 +63,8 @@ class Customer(models.Model):
     phone = models.CharField(max_length=10)
     favourites = models.ManyToManyField(Product, related_name='favourited_by', blank=True)
 
-    def get_all_customers(self):
+    @staticmethod
+    def get_all_customers():
         return Customer.objects.all()
 
     def get_full_name(self):
@@ -102,6 +103,10 @@ class Order(models.Model):
 
     def placeOrder(self):
         self.save()
+
+    @staticmethod
+    def get_all_orders():
+        return Order.objects.all()
 
     @staticmethod
     def get_orders_by_customer(customer_id):
