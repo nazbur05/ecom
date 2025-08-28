@@ -5,46 +5,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}TechStore{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'shop/css/styles.css' %}">
 </head>
 
 <body>
     <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">TechStore</a></li>
-                <li class="dropdown">
-                    <a href="#">Categories</a>
-                    <ul>
-                        {% for category in categories %}
-                            <li>
-                                <a href="{% url 'products_by_category' category.id %}">{{ category.name }}</a>
-                                {% if category.subcategories.all %}
-                                <ul>
+        <div class="nav-categories-wrapper" style="position:relative;">
+            <nav>
+                <ul>
+                    <li><a href="{% url 'home' %}">TechStore</a></li>
+                    <li class="categories-menu">
+                        <a href="#">Categories</a>
+                    </li>
+                    <li><a href="{% url 'favourites' %}">Favourites</a></li>
+                    <li><a href="{% url 'cart' %}">Cart</a></li>
+                    <li class="dropdown">
+                        <a href="#">Account</a>
+                        <ul>
+                            <li><a href="{% url 'profile' %}">Profile</a></li>
+                            <li><a href="{% url 'signup' %}">Sign Up</a></li>
+                            <li><a href="{% url 'login' %}">Login</a></li>
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <div class="category-block">
+                <div class="category-list">
+                    {% for category in categories %}
+                        <div class="category-item">
+                            <a href="{% url 'products_by_category' category.id %}" class="category-title">{{ category.name }}</a>
+                            {% if category.subcategories.all %}
+                                <ul class="subcategory-list">
                                     {% for subcategory in category.subcategories.all %}
                                         <li>
                                             <a href="{% url 'products_by_subcategory' subcategory.id %}">{{ subcategory.name }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                <li><a href="{% url 'favourites' %}">Favourites</a></li>
-                <li><a href="{% url 'cart' %}">Cart</a></li>
-                <li class="dropdown">
-                    <a href="#">Account</a>
-                    <ul>
-                        <li><a href="{% url 'profile' %}">Profile</a></li>
-                        <li><a href="{% url 'signup' %}">Sign Up</a></li>
-                        <li><a href="{% url 'login' %}">Login</a></li>
-                        <li><a href="{% url 'logout' %}">Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </header>
 
     <main>
@@ -55,5 +59,28 @@
     <footer>
         <p>&copy; 2025 TechStore</p>
     </footer>
+
+    <script>
+    // Categories hovering effects
+    const categoriesMenu = document.querySelector('.categories-menu');
+    const categoryBlock = document.querySelector('.category-block');
+
+    categoriesMenu.addEventListener('mouseenter', () => {
+        categoryBlock.style.display = 'block';
+    });
+    categoriesMenu.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+            if (!categoryBlock.matches(':hover')) {
+                categoryBlock.style.display = 'none';
+            }
+        }, 100);
+    });
+    categoryBlock.addEventListener('mouseleave', () => {
+        categoryBlock.style.display = 'none';
+    });
+    categoryBlock.addEventListener('mouseenter', () => {
+        categoryBlock.style.display = 'block';
+    });
+    </script>
 </body>
 </html>
