@@ -1,21 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>Checkout</h1>
-    <div id="checkout-summary"></div>
-    <form id="checkout-form">
-        <label>Shipping Address:<br>
-            <input type="text" name="address" required>
-        </label>
-        <br>
-        <label>Phone Number:<br>
-            <input type="text" name="phone" required value="{{ customer.phone }}">
-        </label>
-        <br>
-        <button type="submit">Place Order</button>
-    </form>
+<h1 class="checkout-title">Checkout</h1>
+<div id="checkout-summary"></div>
+<form id="checkout-form" class="checkout-form">
+    <label>
+        Shipping Address<br>
+        <input type="text" name="address" required value="{{ customer.address|default_if_none:'' }}">
+    </label>
+    <label>
+        Phone Number<br>
+        <input type="text" name="phone" required value="{{ customer.phone }}">
+    </label>
+    <button type="submit">Place Order</button>
     <div id="checkout-message"></div>
-</div>
+</form>
 <script>
 fetch('/shop/api/customers/{{ request.user.customer.id }}/cart/')
     .then(response => response.json())
@@ -24,9 +22,9 @@ fetch('/shop/api/customers/{{ request.user.customer.id }}/cart/')
         document.getElementById('checkout-summary').innerHTML = `
             <h3>Order Summary</h3>
             <ul>
-                ${products.map(p => `<li>${p.name} x ${p.quantity || 1} = ${p.price * (p.quantity || 1)} KZT</li>`).join('')}
+                ${products.map(p => `<li>${p.name} x${p.quantity || 1} <span style="float:right;">${p.price * (p.quantity || 1)} KZT</span></li>`).join('')}
             </ul>
-            <strong>Total: ${total} KZT</strong>
+            <div class="order-total">Total: <span>${total} KZT</span></div>
         `;
     });
 

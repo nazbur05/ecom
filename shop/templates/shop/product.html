@@ -30,14 +30,12 @@ fetch('/shop/api/products/{{ product_id }}/')
             <p>Price: ${product.price} KZT</p>
             <p>${product.description}</p>
         `;
-        // Check if product is in favourites
         fetch('/shop/api/customers/{{ request.user.customer.id }}/favourites/')
             .then(response => response.json())
             .then(favourites => {
                 isFavourited = favourites.some(fav => fav.id === product.id);
                 updateFavButton();
             });
-        // Check if product is in cart
         fetch('/shop/api/customers/{{ request.user.customer.id }}/cart/')
             .then(response => response.json())
             .then(cartProducts => {
