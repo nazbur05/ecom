@@ -5,15 +5,15 @@ from .models import Category, SubCategory, Product, Customer, Order
 from .serializers import CategorySerializer, SubCategorySerializer, ProductSerializer, CustomerSerializer, OrderSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.get_all_categories()
     serializer_class = CategorySerializer
 
 class SubCategoryViewSet(viewsets.ModelViewSet):
-    queryset = SubCategory.objects.all()
+    queryset = SubCategory.get_all_subcategories()
     serializer_class = SubCategorySerializer
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.get_all_products()
     serializer_class = ProductSerializer
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -42,11 +42,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def checkout(self, request, pk=None):
         customer = self.get_object()
-        # Debug
+
+        # For debugging
         print("first_name:", repr(customer.user.first_name))
         print("last_name:", repr(customer.user.last_name))
         print("email:", repr(customer.user.email))
         print("phone:", repr(customer.phone))
+
         def is_filled(val):
             return bool(val and str(val).strip())
         required_fields = [
@@ -56,12 +58,18 @@ class CustomerViewSet(viewsets.ModelViewSet):
             customer.user.email
         ]
         if not all(is_filled(field) for field in required_fields):
-            return Response({'status': 'error', 'message': 'Please complete your profile before placing an order.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'status': 'error', 
+                'message': 'Please complete your profile before placing an order.'
+            }, status=status.HTTP_400_BAD_REQUEST)
         address = request.data.get('address', '')
         phone = request.data.get('phone', '')
         orders = Order.objects.filter(customer=customer, status=False)
         if not orders.exists():
-            return Response({'status': 'error', 'message': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'status': 'error', 
+                'message': 'Cart is empty'
+            }, status=status.HTTP_400_BAD_REQUEST)
         for order in orders:
             order.address = address
             order.phone = phone

@@ -36,8 +36,7 @@ class Product(models.Model):
     name = models.CharField(max_length=60)
     price = models.IntegerField(default=0)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, default=1)
-    description = models.CharField(
-        max_length=250, default='', blank=True, null=True)
+    description = models.CharField(max_length=250, default='', blank=True, null=True)
     image = models.ImageField(upload_to='uploads/products/')
 
     @staticmethod
@@ -50,27 +49,22 @@ class Product(models.Model):
   
     @staticmethod
     def get_all_products_by_subcategoryid(subcategory_id):
-        if subcategory_id:
-            return Product.objects.filter(subcategory=subcategory_id)
-        return Product.get_all_products()
+        return Product.objects.filter(subcategory_id=subcategory_id)
 
     @staticmethod
     def get_all_products_by_categoryid(category_id):
-        if category_id:
-            return Product.objects.filter(subcategory__parent=category_id)
-        else:
-            return Product.get_all_products()
-        
+        return Product.objects.filter(subcategory__parent_id=category_id)
+
     def __str__(self):
         return self.name
-        
+
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     phone = models.CharField(max_length=10)
     favourites = models.ManyToManyField(Product, related_name='favourited_by', blank=True)
 
-    def __str__(self):
-        return self.user.username if self.user else "No user"
+    def get_all_customers(self):
+        return Customer.objects.all()
 
     def get_full_name(self):
         if self.user:
@@ -78,13 +72,14 @@ class Customer(models.Model):
         return ""
 
     def get_email(self):
-        if self.user:
-            return self.user.email
-        return ""
+        return self.user.email if self.user else ""
 
     def get_favourites(self):
         return self.favourites.all()
 
+    def __str__(self):
+        return self.user.username if self.user else "No user"
+    
 @receiver(post_save, sender=User)
 def create_customer(sender, instance, created, **kwargs):
     if created:
@@ -110,4 +105,4 @@ class Order(models.Model):
 
     @staticmethod
     def get_orders_by_customer(customer_id):
-        return Order.objects.filter(customer=customer_id).order_by('-date')
+        return Order.objects.filter(customer_id=customer_id).order_by('-date')

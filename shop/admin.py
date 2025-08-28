@@ -10,10 +10,6 @@ class SubCategoryAdmin(admin.ModelAdmin):
     list_filter = ('parent',)
     search_fields = ('name',)
 
-# class ProductAdmin(admin.ModelAdmin):
-#     list_display = ('name',)
-#     search_fields = ('name',)
-
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Product)
