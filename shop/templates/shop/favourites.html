@@ -112,7 +112,7 @@ fetch('/shop/api/customers/{{ request.user.customer.id }}/favourites/')
                     body: JSON.stringify({product_id: productId})
                 })
                 .then(response => response.json())
-                .then data => {
+                .then(data => {
                     if (data.status === 'added') {
                         isInCart = true;
                         updateCartButton();

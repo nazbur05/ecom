@@ -6,14 +6,15 @@ from shop.models import Customer
 def profile_view(request):
     customer = Customer.objects.get(user=request.user)
     if request.method == 'POST':
-        full_name = request.POST.get('full_name', '')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
         phone = request.POST.get('phone', '')
         email = request.POST.get('email', '')
-        if full_name:
-            names = full_name.split(' ', 1)
-            customer.user.first_name = names[0]
-            customer.user.last_name = names[1] if len(names) > 1 else ''
-            customer.user.save()
+        if first_name:
+            customer.user.first_name = first_name
+        if last_name:
+            customer.user.last_name = last_name
+        customer.user.save()
         if email:
             customer.user.email = email
             customer.user.save()

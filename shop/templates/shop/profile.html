@@ -4,8 +4,12 @@
     <h1>Your Profile</h1>
     <form method="post">
         {% csrf_token %}
-        <label>Full Name:<br>
-            <input type="text" name="full_name" value="{{ customer.get_full_name }}">
+        <label>First Name:<br>
+            <input type="text" name="first_name" value="{{ customer.user.first_name }}">
+        </label>
+        <br>
+        <label>Last Name:<br>
+            <input type="text" name="last_name" value="{{ customer.user.last_name }}">
         </label>
         <br>
         <label>Email:<br>
