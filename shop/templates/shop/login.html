@@ -2,7 +2,8 @@
 {% block title %}Home - TechStore{% endblock %}
 
 {% block content %}
-<form method="post">
+<h2 style="text-align:center; margin-top:2rem;">Login</h2>
+<form method="post" style="max-width:350px; margin:2rem auto; border: 5px solid #ffa970; padding:2rem 2.5rem; border-radius:8px;">
     {% csrf_token %}
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" required>
@@ -10,16 +11,16 @@
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
     <br>
-    <button type="submit">Login</button>
+    <button type="submit" class="auth-btn">Login</button>
+    <p style="text-align:center; margin-top:1rem;">
+        <a href="{% url 'signup' %}">Don't have an account? Sign up here</a>
+    </p>
+    {% if messages %}
+        <ul class="auth-messages">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 </form>
-
-<a href="{% url 'signup' %}">Don't have an account? Sign up here</a>
-
-{% if messages %}
-    <ul>
-    {% for message in messages %}
-        <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-{% endif %}
 {% endblock %}

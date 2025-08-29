@@ -3,7 +3,7 @@
 
 {% block content %}
 <h2 style="text-align:center; margin-top:2rem;">Sign Up</h2>
-<form method="post" style="max-width:350px; margin:2rem auto; background:#fff; padding:2rem 2.5rem; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+<form method="post" style="max-width:350px; margin:2rem auto; border: 5px solid #ffa970; padding:2rem 2.5rem; border-radius:8px;">
     {% csrf_token %}
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" required>

@@ -32,7 +32,7 @@ def run():
         price=299999,
         subcategory=smartphones_sub,
         description='Смартфон с AMOLED дисплеем и батареей 5000 мАч.',
-        image='uploads/products/cze6vo443eess4sel3u894loixvkr4uu'
+        image='uploads/products/cze6vo443eess4sel3u894loixvkr4uu.webp'
     )
     Product.objects.get_or_create(
         name='iPhone 15',

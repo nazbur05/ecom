@@ -12,6 +12,7 @@ router.register(r'customers', CustomerViewSet)
 router.register(r'orders', OrderViewSet)
 
 urlpatterns = [
+    path('api/', include(router.urls)),
     path('', home.home_view, name='home'),
     path('signup/', signup.signup_view, name='signup'),
     path('login/', login.login_view, name='login'),
@@ -21,14 +22,9 @@ urlpatterns = [
     path('orders/', orders.orders_view, name='orders'),
     path('favourites/', favourites.favourites_view, name='favourites'),
     path('profile/', profile.profile_view, name='profile'),
-    
-    path('api/', include(router.urls)),
     path('product/<int:pk>/', product.product_api_detail, name='product'),
     path('products/category/<int:category_id>/', product.products_by_category, name='products_by_category'),
     path('products/subcategory/<int:subcategory_id>/', product.products_by_subcategory, name='products_by_subcategory'),
     path('orders/', orders.orders_view, name='orders'),
     path('profile/', profile.profile_view, name='profile'),
-
-    path('login/', auth_views.LoginView.as_view(template_name='shop/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 ]
