@@ -11,7 +11,7 @@ def product_api_detail(request, pk):
 def products_by_category(request, category_id):
     category = get_object_or_404(Category, pk=category_id)
     products = Product.get_all_products_by_categoryid(category_id).order_by('id')
-    paginator = Paginator(products, 12)
+    paginator = Paginator(products, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     categories = Category.get_all_categories()
@@ -27,7 +27,7 @@ def products_by_category(request, category_id):
 def products_by_subcategory(request, subcategory_id):
     subcategory = get_object_or_404(SubCategory, pk=subcategory_id)
     products = Product.get_all_products_by_subcategoryid(subcategory_id).order_by('id')
-    paginator = Paginator(products, 12)
+    paginator = Paginator(products, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     categories = Category.get_all_categories()

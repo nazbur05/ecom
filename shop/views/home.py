@@ -5,7 +5,7 @@ from shop.models import Customer, Product, Order
 
 def home_view(request):
     products = Product.objects.all().order_by('id')
-    paginator = Paginator(products, 12)
+    paginator = Paginator(products, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     if request.user.is_authenticated:
